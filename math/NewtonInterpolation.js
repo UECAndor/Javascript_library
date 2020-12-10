@@ -9,10 +9,6 @@ new function Interpolation (x, y, a, n) {
     var j = 0
     var m = []
 
-    x = [200,320,380,390,460]
-    y = [250,300,250,400,450]
-    n = 4
-
     a = a.map(function() { return 0; })     //empty current coefficent of the polynom
     x = x.map(parseFloat)                   //format real values for calculation
     y = y.map(parseFloat)                   //format real values for calculation
