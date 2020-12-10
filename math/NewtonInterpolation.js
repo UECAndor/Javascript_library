@@ -7,20 +7,11 @@ new function Interpolation (x, y, a, n) {
     var f = []
     var i = 0
     var j = 0
+    var m = []
 
-        //Debug
-        var x = [-1, 0, 1,3];
-        var y = [1, 3, -7, 3];
-        var a = [0,0,0];
-        var n = 3;
-        /*Solution: 
-        Pyramid: 
-        1; 3; -7; 3
-        2; -10; 5
-        -6; 5
-        2,75
-        Koeffizienten:
-        2,75; -6; -6,75; 3 */
+    x = [200,320,380,390,460]
+    y = [250,300,250,400,450]
+    n = 4
 
     a = a.map(function() { return 0; })     //empty current coefficent of the polynom
     x = x.map(parseFloat)                   //format real values for calculation
@@ -51,7 +42,7 @@ new function Interpolation (x, y, a, n) {
         f[0][i] = y[i]
     }
 
-   for(i = 0; i < n; i++){
+    for(i = 0; i < n; i++){
        f[i + 1] = []
        for(j = 1; j <= (n - i); j++){
            f[i + 1][j - 1] = (f[i][j] - f[i][j - 1]) / (x[j + i] - x[j - 1])
@@ -59,8 +50,46 @@ new function Interpolation (x, y, a, n) {
    }
 
    /*
+        Generate a 2 dimensiol array for storing the binomial values of the x-Array
 
+                m[0][]      m[1][]      m[2][]                          m[3][]
+        1       1           -x[0]       x[0]x[1]                        -(x[0]x[1]x[2])
+        x                   1           m[1][0] + m[1][1] * x[1]        m[2][0] + m[2][1] * x[2]
+        x^2                             1                               -(m[2][1] + m[2][2] * x[2])
+        x^3                                                             1
+        x^n
    */
+   //Init first 2 dimensions of the array as base values
+   m[0] = []
+   m[0][0] = 1
+   m[1] = []
+   m[1][0] = -x[0]
+   m[1][1] = 1
 
+   //Loop over the remaining dimensions, extending the binomials with the next x-array-value
+   for(i = 2; i <= n + 1; i++ ){
+        //Init root value of the dimension
+        m[i] = []
+        m[i][0] = m[i - 1][0] * x[i - 1]
 
+        //Loop over all sub dimensions of the root
+        for(j = 1; j < i; j++){
+            if(i%2 == 0 && j%2 !== 0){
+                m[i][j] = m[i - 1][j - 1] + m[i - 1][j] * x[i - 1]
+            }
+            else{
+                m[i][j] = m[i - 1][j - 1] + m[i - 1][j] * x[i - 1] * -1
+            }
+        }
+        m[i][j] = 1
+    }
+
+    //Calculate final coefficents by multipling the 2 dimensiol pyramid array f and the 2 dimensiol array of binomial x values m
+    for(i = 0; i < n; i++){
+
+        for(j = i; j <= n; j++){
+            a[i] += m[j][i] * f[j][0]
+        }
+    }
+    a[n] = f[n][0]
 }
